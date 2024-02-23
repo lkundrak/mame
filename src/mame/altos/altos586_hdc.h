@@ -22,7 +22,7 @@ public:
 	altos586_hdc_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock, T &&bus_tag)
 		: altos586_hdc_device(mconfig, tag, owner, clock)
 	{
-		m_bus.set_tag(std::forward<T>(bus_tag));
+		m_bus.set_tag(std::forward<T>(bus_tag), AS_PROGRAM);
 	}
 
 	altos586_hdc_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock);
@@ -32,7 +32,6 @@ public:
 
 protected:
 	virtual void device_start() override;
-	virtual void device_config_complete() override;
 	virtual void device_reset() override;
 	virtual void device_add_mconfig(machine_config &config) override;
 
@@ -58,11 +57,10 @@ private:
 	void sector_read(uint8_t index);
 	void sector_write(uint8_t index);
 
-	required_device<device_memory_interface> m_bus;
+	required_address_space m_bus;
 	required_device<i8089_device> m_iop;
 	required_device<harddisk_image_device> m_hdd0;
 	required_device<harddisk_image_device> m_hdd1;
-	required_address_space m_bus_mem;
 
 	// Disk controller state
 	uint8_t m_status;
