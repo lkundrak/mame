@@ -39,13 +39,6 @@ protected:
 	void altos586_hdc_mem(address_map &map);
 
 private:
-	required_device<device_memory_interface> m_bus;
-	required_device<i8089_device> m_iop;
-	required_device<harddisk_image_device> m_hdd0;
-	required_device<harddisk_image_device> m_hdd1;
-
-	address_space *m_bus_mem;
-
 	// Register on main bus.
 	void attn_w(uint16_t data);
 
@@ -64,6 +57,14 @@ private:
 	void sector_read(uint8_t index);
 	void sector_write(uint8_t index);
 
+	required_device<device_memory_interface> m_bus;
+	required_device<i8089_device> m_iop;
+	required_device<harddisk_image_device> m_hdd0;
+	required_device<harddisk_image_device> m_hdd1;
+
+	address_space *m_bus_mem;
+
+	// Disk controller state
 	uint8_t m_status;
 	uint8_t m_seek_status;
 
@@ -76,6 +77,7 @@ private:
 	uint8_t m_drive;
 	uint8_t m_head;
 	const struct hard_disk_file::info* m_geom[2];
+
 };
 
 DECLARE_DEVICE_TYPE(ALTOS586_HDC, altos586_hdc_device)
