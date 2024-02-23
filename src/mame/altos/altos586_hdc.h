@@ -32,6 +32,7 @@ public:
 
 protected:
 	virtual void device_start() override;
+	virtual void device_config_complete() override;
 	virtual void device_reset() override;
 	virtual void device_add_mconfig(machine_config &config) override;
 
@@ -61,8 +62,7 @@ private:
 	required_device<i8089_device> m_iop;
 	required_device<harddisk_image_device> m_hdd0;
 	required_device<harddisk_image_device> m_hdd1;
-
-	address_space *m_bus_mem;
+	required_address_space m_bus_mem;
 
 	// Disk controller state
 	uint8_t m_status;
