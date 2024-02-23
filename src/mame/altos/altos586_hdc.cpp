@@ -59,11 +59,10 @@ DEFINE_DEVICE_TYPE(ALTOS586_HDC, altos586_hdc_device, "altos586_hdc", "Disk Cont
 
 altos586_hdc_device::altos586_hdc_device(const machine_config &mconfig, const char *tag, device_t *owner, uint32_t clock)
 	: device_t(mconfig, ALTOS586_HDC, tag, owner, clock)
-	, m_bus(*this, finder_base::DUMMY_TAG)
+	, m_bus(*this, finder_base::DUMMY_TAG, -1)
 	, m_iop(*this, "iop")
 	, m_hdd0(*this, "drive0")
 	, m_hdd1(*this, "drive1")
-	, m_bus_mem(*this, finder_base::DUMMY_TAG, -1)
 {
 }
 
@@ -113,12 +112,12 @@ void altos586_hdc_device::sector_write(uint8_t index)
 
 uint16_t altos586_hdc_device::mem_r(offs_t offset, uint16_t mem_mask)
 {
-	return m_bus_mem->read_word_unaligned(offset << 1, mem_mask);
+	return m_bus->read_word_unaligned(offset << 1, mem_mask);
 }
 
 void altos586_hdc_device::mem_w(offs_t offset, uint16_t data, uint16_t mem_mask)
 {
-	m_bus_mem->write_word_unaligned(offset << 1, data, mem_mask);
+	m_bus->write_word_unaligned(offset << 1, data, mem_mask);
 }
 
 void altos586_hdc_device::altos586_hdc_mem(address_map &map)
@@ -367,11 +366,6 @@ void altos586_hdc_device::attn_w(uint16_t data)
 {
 	m_iop->ca_w(ASSERT_LINE);
 	m_iop->ca_w(CLEAR_LINE);
-}
-
-void altos586_hdc_device::device_config_complete()
-{
-	m_bus_mem.set_tag(m_bus, AS_PROGRAM);
 }
 
 void altos586_hdc_device::device_start()
