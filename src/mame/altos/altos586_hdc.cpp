@@ -63,6 +63,7 @@ altos586_hdc_device::altos586_hdc_device(const machine_config &mconfig, const ch
 	, m_iop(*this, "iop")
 	, m_hdd0(*this, "drive0")
 	, m_hdd1(*this, "drive1")
+	, m_bus_mem(*this, finder_base::DUMMY_TAG, -1)
 {
 }
 
@@ -368,6 +369,11 @@ void altos586_hdc_device::attn_w(uint16_t data)
 	m_iop->ca_w(CLEAR_LINE);
 }
 
+void altos586_hdc_device::device_config_complete()
+{
+	m_bus_mem.set_tag(m_bus, AS_PROGRAM);
+}
+
 void altos586_hdc_device::device_start()
 {
 	// TODO: Eeek! This is quite possibly not a great way to tap into board's I/O space.
@@ -375,6 +381,5 @@ void altos586_hdc_device::device_start()
 	// Please send help.
 	auto m_board = dynamic_cast<device_memory_interface *>(owner());
 
-	m_bus_mem = &m_bus->space(AS_PROGRAM);
 	m_board->space(AS_IO).install_write_handler(0xff00, 0xff01, write16smo_delegate(*this, FUNC(altos586_hdc_device::attn_w)));
 }
