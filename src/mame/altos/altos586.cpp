@@ -384,6 +384,7 @@ public:
 		, m_cpu(*this, "cpu")
 		, m_mmu(*this, "mmu")
 		, m_pic(*this, "pic8259")
+		, m_pit(*this, "pit")
 		, m_iop(*this, "iop")
 		, m_fdc(*this, "fd1797")
 		, m_floppy(*this, "fd1797:%u", 0)
@@ -427,6 +428,7 @@ private:
 	required_device<i8086_cpu_device> m_cpu;
 	required_device<altos586_mmu_device> m_mmu;
 	required_device<pic8259_device> m_pic;
+	required_device<pit8254_device> m_pit;
 	required_device<z80_device> m_iop;
 	required_device<fd1797_device> m_fdc;
 	required_device_array<floppy_connector, 2> m_floppy;
@@ -452,8 +454,15 @@ void altos586_state::io_map(address_map &map)
 	map(0x0068, 0x006F).r(m_mmu, FUNC(altos586_mmu_device::err_addr1_r));
 	map(0x0070, 0x0077).rw(m_mmu, FUNC(altos586_mmu_device::clr_violation_r), FUNC(altos586_mmu_device::clr_violation_w));
 	map(0x0078, 0x007f).r(m_mmu, FUNC(altos586_mmu_device::violation_r));
-	map(0x0080, 0x00ff).rw(m_pic, FUNC(pic8259_device::read), FUNC(pic8259_device::write)).umask16(0xff00);
-	map(0x0100, 0x01ff).rw("pit", FUNC(pit8254_device::read), FUNC(pit8254_device::write)).umask16(0xff00);
+
+	// These are wired funnily
+	map(0x0080, 0x00ff).lrw16(
+		NAME([this](offs_t offset) { return m_pic->read(~offset & 1); }),
+		NAME([this](offs_t offset, u16 data) { m_pic->write(~offset & 1, data); }));
+	map(0x0100, 0x01ff).lrw16(
+		NAME([this](offs_t offset) { return m_pit->read(~offset) << 8; }),
+		NAME([this](offs_t offset, u16 data) { m_pit->write(~offset, data >> 8); }));
+
 	map(0x0200, 0x03ff).rw(m_mmu, FUNC(altos586_mmu_device::map_ram_r), FUNC(altos586_mmu_device::map_ram_w));
 	// Addresses 0400H to FFFFH are, unlike the above, accessible from
 	// other bus masters than the main CPU. Peripherals are expected to
@@ -623,18 +632,13 @@ void altos586_state::altos586(machine_config &config)
 	PIC8259(config, m_pic);
 	m_pic->out_int_callback().set_inputline(m_cpu, INPUT_LINE_IRQ0);
 
-	pit8254_device &pit(PIT8254(config, "pit", 0));
-	pit.set_clk<0>(30_MHz_XTAL/6);
-	pit.out_handler<0>().set("iop_sio2", FUNC(z80sio_device::rxcb_w));
-	pit.out_handler<0>().append("iop_sio2", FUNC(z80sio_device::txcb_w));
-	pit.set_clk<1>(30_MHz_XTAL/6);
-	// TODO: I don't remember what the messy comments I've left below means. Verify/fix.
-	//pit.out_handler<1>().set(XXX); // prescaler produces 62.5K
-	//pit.set_clk<2>(XXX); // 62.5K from the above
-	pit.set_clk<2>(62'500); // 62.5K from the above
-	//pit.set_clk<2>(30'000'000); // 62.5K from the above
-	// TODO: Interrupt disabled, because it seems to arrive at wrong times. Fix it.
-//	pit.out_handler<2>().set(m_pic, FUNC(pic8259_device::ir1_w));
+	PIT8254(config, m_pit);
+	m_pit->set_clk<0>(30_MHz_XTAL/6);
+	m_pit->out_handler<0>().set("iop_sio2", FUNC(z80sio_device::rxcb_w));
+	m_pit->out_handler<0>().append("iop_sio2", FUNC(z80sio_device::txcb_w));
+	m_pit->set_clk<1>(30_MHz_XTAL/6);
+	m_pit->set_clk<2>(62'500);
+	m_pit->out_handler<2>().set(m_pic, FUNC(pic8259_device::ir1_w));
 
 	Z80(config, m_iop, 8_MHz_XTAL/2);
 	m_iop->set_addrmap(AS_PROGRAM, &altos586_state::iop_mem);
