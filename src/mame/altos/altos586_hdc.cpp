@@ -53,7 +53,8 @@
 #include "emu.h"
 #include "altos586_hdc.h"
 
-#define VERBOSE 0
+//#define VERBOSE 1
+#include "logmacro.h"
 
 DEFINE_DEVICE_TYPE(ALTOS586_HDC, altos586_hdc_device, "altos586_hdc", "Disk Controller board for Altos 586")
 
@@ -77,8 +78,7 @@ bool altos586_hdc_device::sector_exists(uint8_t index)
 	} else if (index > m_geom[m_drive]->sectors) {
 		logerror("sector %d not present in drive that has %d sectors per track", index, m_geom[m_drive]->sectors);
 	} else {
-		if (VERBOSE)
-			logerror("drive %d sector CHS=%d/%d/%d found\n", m_drive, m_cyl[m_drive], m_head, index);
+		LOG("drive %d sector CHS=%d/%d/%d found\n", m_drive, m_cyl[m_drive], m_head, index);
 		return true;
 	}
 
@@ -133,8 +133,7 @@ uint16_t altos586_hdc_device::data_r(offs_t offset)
 	m_secoffset %= sizeof(m_sector);
 
 	if (m_secoffset == 0) {
-		if (VERBOSE)
-			logerror("read reached the end of the data buffer\n");
+		LOG("read reached the end of the data buffer\n");
 		m_iop->drq1_w(CLEAR_LINE);
 	}
 
@@ -156,22 +155,21 @@ void altos586_hdc_device::data_w(offs_t offset, uint16_t data)
 			logerror("cylinder number mismatch\n");
 		if ((m_sector[3] >> 4) != m_head)
 			logerror("head number mismatch\n");
-		if (VERBOSE & (m_sector[0] != m_sector[4])) {
+		if (m_sector[0] != m_sector[4]) {
 			// I think (not sure), that this might be okay for interleaved access.
-			logerror("sector number mismatch (probably okay)\n");
+			LOG("sector number mismatch (probably okay)\n");
 		}
-		if (VERBOSE) {
-			logerror("writing drive %d sector CHS=%d/%d/%d format finished\n", m_drive, m_cyl[m_drive], m_head, m_sector[0]);
-			logerror("  sector mark = 0x%02x\n", m_sector[1]);
-			logerror("  cylinder low = 0x%02x\n", m_sector[2]);
-			logerror("  head | cylinder hi = 0x%02x\n", m_sector[3]);
-			logerror("  sector = 0x%02x\n", m_sector[4]);
-		}
+
+		LOG("writing drive %d sector CHS=%d/%d/%d format finished\n", m_drive, m_cyl[m_drive], m_head, m_sector[0]);
+		LOG("  sector mark = 0x%02x\n", m_sector[1]);
+		LOG("  cylinder low = 0x%02x\n", m_sector[2]);
+		LOG("  head | cylinder hi = 0x%02x\n", m_sector[3]);
+		LOG("  sector = 0x%02x\n", m_sector[4]);
+
 		m_iop->drq1_w(CLEAR_LINE);
 		m_secoffset = 0;
 	} else if (m_secoffset == 0) {
-		if (VERBOSE)
-			logerror("write reached the end of the data buffer\n");
+		LOG("write reached the end of the data buffer\n");
 		m_iop->drq1_w(CLEAR_LINE);
 		sector_write(m_sector[0]);
 	}
@@ -208,8 +206,7 @@ void altos586_hdc_device::head_select_w(offs_t offset, uint16_t data)
 	// Ready.
 	m_status |= 0x80;
 
-	if (VERBOSE)
-		logerror("selected drive %d head %d\n", m_drive, m_head);
+	LOG("selected drive %d head %d\n", m_drive, m_head);
 }
 
 uint16_t altos586_hdc_device::seek_status_r(offs_t offset)
@@ -234,8 +231,7 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 	case 0x01:
 		// Read.
 		// Sector number now in data buffer, data readout follows.
-		if (VERBOSE)
-			logerror("READ command\n");
+		LOG("READ command\n");
 		if (m_secoffset != 1)
 			logerror("expected one value in data buffer, has %d\n", m_secoffset);
 
@@ -247,8 +243,7 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 	case 0x01 | 0x08:
 		// Long Read.
 		// Sector number now in data buffer, header + data readout follows.
-		if (VERBOSE)
-			logerror("READ LONG command\n");
+		LOG("READ LONG command\n");
 		if (m_secoffset != 1)
 			logerror("expected one value in data buffer, has %d\n", m_secoffset);
 
@@ -266,8 +261,7 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 	case 0x02:
 		// Write.
 		// Sector number now in data buffer, data write follows.
-		if (VERBOSE)
-			logerror("WRITE command\n");
+		LOG("WRITE command\n");
 		if (m_secoffset != 1)
 			logerror("expected one value in data buffer, has %d\n", m_secoffset);
 
@@ -279,8 +273,7 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 	case 0x04:
 		// Write Sector Format.
 		// Sector number now in data buffer, header write follows.
-		if (VERBOSE)
-			logerror("WRITE FORMAT command\n");
+		LOG("WRITE FORMAT command\n");
 		if (m_secoffset != 1)
 			logerror("expected one value in data buffer, has %d\n", m_secoffset);
 
@@ -291,8 +284,7 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 	case 0x10:
 		// Seek to cylinder.
 		// Current cylinder is in data buffer, new one in a separate latch.
-		if (VERBOSE)
-			logerror("SEEK from cylinder %d to %d\n", m_sector[1] << 8 | m_sector[0], m_cyl_latch);
+		LOG("SEEK from cylinder %d to %d\n", m_sector[1] << 8 | m_sector[0], m_cyl_latch);
 		if (m_secoffset != 2)
 			logerror("expected two values in data buffer, has %d\n", m_secoffset);
 
@@ -306,16 +298,14 @@ void altos586_hdc_device::command_w(offs_t offset, uint16_t data)
 
 	case 0x20:
 		// Not sure, actually.
-		if (VERBOSE)
-			logerror("SELECT command\n");
+		LOG("SELECT command\n");
 		// Head/drive selected?
 		m_seek_status |= 0x01;
 		break;
 
 	case 0x80:
 		// This looks like a reset of some sort.
-		if (VERBOSE)
-			logerror("RESET command\n");
+		LOG("RESET command\n");
 		device_reset();
 		break;
 
