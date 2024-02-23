@@ -673,7 +673,7 @@ void i8086_common_cpu_device::write_port_byte(uint16_t port, uint8_t data)
 
 void i8086_common_cpu_device::write_port_byte_al(uint16_t port)
 {
-	if ( port & 1 )
+	if (port & 1)
 		m_io->write_word(port-1, swapendian_int16(m_regs.w[AX]), 0xff00);
 	else
 		m_io->write_word(port, m_regs.w[AX], 0x00ff);
