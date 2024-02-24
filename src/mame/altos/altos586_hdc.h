@@ -39,6 +39,8 @@ protected:
 	void altos586_hdc_mem(address_map &map);
 
 private:
+	const hard_disk_file::info *check_hdd(harddisk_image_device *hdd);
+
 	// Register on main bus.
 	void attn_w(uint16_t data);
 

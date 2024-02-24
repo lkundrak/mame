@@ -71,8 +71,6 @@ bool altos586_hdc_device::sector_exists(uint8_t index)
 {
 	if (!m_geom[m_drive]) {
 		logerror("drive not present: %d", m_drive);
-	} else if (m_geom[m_drive]->sectorbytes != 512) {
-		logerror("expected 512 bytes per sector, got %d", m_geom[m_drive]->sectorbytes);
 	} else if (m_head > m_geom[m_drive]->heads) {
 		logerror("head %d not present in drive that has %d heads", m_head, m_geom[m_drive]->heads);
 	} else if (index > m_geom[m_drive]->sectors) {
@@ -337,6 +335,19 @@ void altos586_hdc_device::device_add_mconfig(machine_config &config)
 	HARDDISK(config, "drive1", 0);
 }
 
+const hard_disk_file::info *altos586_hdc_device::check_hdd(harddisk_image_device *hdd)
+{
+	if (!hdd->exists())
+		return nullptr;
+
+	if (hdd->get_info().sectorbytes != 512) {
+		logerror("expected 512 bytes per sector, got %d", m_geom[m_drive]->sectorbytes);
+		return nullptr;
+	}
+
+	return &hdd->get_info();
+}
+
 void altos586_hdc_device::device_reset()
 {
 	m_status = 0;
@@ -348,8 +359,8 @@ void altos586_hdc_device::device_reset()
 	memset(m_sector, 0, sizeof(m_sector));
 	m_secoffset = 0;
 
-	m_geom[0] = m_hdd0->exists() ? &m_hdd0->get_info() : nullptr;
-	m_geom[1] = m_hdd1->exists() ? &m_hdd1->get_info() : nullptr;
+	m_geom[0] = check_hdd(m_hdd0);
+	m_geom[1] = check_hdd(m_hdd1);
 }
 
 void altos586_hdc_device::attn_w(uint16_t data)
