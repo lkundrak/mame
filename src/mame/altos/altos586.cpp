@@ -436,6 +436,8 @@ private:
 	required_device_array<floppy_connector, 2> m_floppy;
 
 	u8 m_hiaddr;
+
+	memory_access<20, 1, 0, ENDIANNESS_LITTLE>::specific m_mmu_mem;
 };
 
 void altos586_state::mem_map(address_map &map)
@@ -519,12 +521,12 @@ void altos586_state::iop_attn_w(offs_t offset, u8 data)
 
 u8 altos586_state::hostram_r(offs_t offset)
 {
-	return m_mmu->space(AS_PROGRAM).read_byte((m_hiaddr << 15) | (offset & 0x7fff));
+	return m_mmu_mem.read_byte((m_hiaddr << 15) | (offset & 0x7fff));
 }
 
 void altos586_state::hostram_w(offs_t offset, u8 data)
 {
-	m_mmu->space(AS_PROGRAM).write_byte((m_hiaddr << 15) | (offset & 0x7fff), data);
+	m_mmu_mem.write_byte((m_hiaddr << 15) | (offset & 0x7fff), data);
 }
 
 void altos586_state::hiaddr_w(u8 data)
@@ -589,6 +591,8 @@ void altos586_state::machine_start()
 	// The address lines to the ROMs are reversed
 	// TODO: is this the right place for this sort of thing?
 	std::reverse(romdata, romdata + romlen);
+
+	m_mmu->space(AS_PROGRAM).specific(m_mmu_mem);
 
 	save_item(NAME(m_hiaddr));
 }
