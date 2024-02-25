@@ -62,8 +62,9 @@ altos586_hdc_device::altos586_hdc_device(const machine_config &mconfig, const ch
 	: device_t(mconfig, ALTOS586_HDC, tag, owner, clock)
 	, m_bus(*this, finder_base::DUMMY_TAG, -1)
 	, m_iop(*this, "iop")
-	, m_hdd0(*this, "drive0")
-	, m_hdd1(*this, "drive1")
+	, m_hdd(*this, "drive%u", 0)
+	//, m_hdd0(*this, "drive0")
+	//, m_hdd1(*this, "drive1")
 {
 }
 
@@ -91,21 +92,17 @@ uint32_t altos586_hdc_device::sector_lba(uint8_t index)
 
 void altos586_hdc_device::sector_read(uint8_t index)
 {
-	harddisk_image_device *drive = (m_drive ? m_hdd1 : m_hdd0);
-
 	if (!sector_exists(index))
 		return;
-	drive->read(sector_lba(index), &m_sector[5]);
+	m_hdd[m_drive]->read(sector_lba(index), &m_sector[5]);
 	m_iop->drq1_w(ASSERT_LINE);
 }
 
 void altos586_hdc_device::sector_write(uint8_t index)
 {
-	harddisk_image_device *drive = (m_drive ? m_hdd1 : m_hdd0);
-
 	if (!sector_exists(index))
 		return;
-	drive->write(sector_lba(index), &m_sector[5]);
+	m_hdd[m_drive]->write(sector_lba(index), &m_sector[5]);
 }
 
 uint16_t altos586_hdc_device::mem_r(offs_t offset, uint16_t mem_mask)
@@ -335,21 +332,10 @@ void altos586_hdc_device::device_add_mconfig(machine_config &config)
 	HARDDISK(config, "drive1", 0);
 }
 
-const hard_disk_file::info *altos586_hdc_device::check_hdd(harddisk_image_device *hdd)
-{
-	if (!hdd->exists())
-		return nullptr;
-
-	if (hdd->get_info().sectorbytes != 512) {
-		logerror("expected 512 bytes per sector, got %d", m_geom[m_drive]->sectorbytes);
-		return nullptr;
-	}
-
-	return &hdd->get_info();
-}
-
 void altos586_hdc_device::device_reset()
 {
+	int i;
+
 	m_status = 0;
 	m_seek_status = 0xfc;
 
@@ -359,8 +345,17 @@ void altos586_hdc_device::device_reset()
 	memset(m_sector, 0, sizeof(m_sector));
 	m_secoffset = 0;
 
-	m_geom[0] = check_hdd(m_hdd0);
-	m_geom[1] = check_hdd(m_hdd1);
+	for (i = 0; i < 2; i++) {
+		if (!m_hdd[i]->exists())
+			continue;
+
+		if (m_hdd[i]->get_info().sectorbytes != 512) {
+			logerror("expected 512 bytes per sector, got %d", m_geom[m_drive]->sectorbytes);
+			continue;
+		}
+
+		m_geom[i] = &m_hdd[i]->get_info();
+	}
 }
 
 void altos586_hdc_device::attn_w(uint16_t data)
