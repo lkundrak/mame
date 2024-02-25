@@ -39,8 +39,6 @@ protected:
 	void altos586_hdc_mem(address_map &map);
 
 private:
-	const hard_disk_file::info *check_hdd(harddisk_image_device *hdd);
-
 	// Register on main bus.
 	void attn_w(uint16_t data);
 
@@ -61,8 +59,7 @@ private:
 
 	required_address_space m_bus;
 	required_device<i8089_device> m_iop;
-	required_device<harddisk_image_device> m_hdd0;
-	required_device<harddisk_image_device> m_hdd1;
+	required_device_array<harddisk_image_device, 2> m_hdd;
 
 	// Disk controller state
 	uint8_t m_status;
