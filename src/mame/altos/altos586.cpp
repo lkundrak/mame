@@ -762,10 +762,10 @@ void altos586_state::altos586(machine_config &config)
 
 ROM_START(altos586)
 	ROM_REGION16_LE(0x4000, "bios", 0)
-	ROM_SYSTEM_BIOS(0, "bios", "bios")
-	ROMX_LOAD("altos586-v13-g1.rom", 0x0001, 0x1000, CRC(29fdcb40) SHA1(34700603d6034f0ccc599d74432cef332459987b) , ROM_SKIP(1) | ROM_BIOS(0))
-	ROMX_LOAD("altos586-v13-g2.rom", 0x0000, 0x1000, CRC(de22003a) SHA1(ce25a45cd4fb0ff63e5064fb74347b978c3a78f1) , ROM_SKIP(1) | ROM_BIOS(0))
+	ROMX_LOAD("altos586-v13-g1.rom", 0x0001, 0x1000, CRC(29fdcb40) SHA1(34700603d6034f0ccc599d74432cef332459987b) , ROM_SKIP(1))
+	ROMX_LOAD("altos586-v13-g2.rom", 0x0000, 0x1000, CRC(de22003a) SHA1(ce25a45cd4fb0ff63e5064fb74347b978c3a78f1) , ROM_SKIP(1))
 	ROM_COPY("bios", 0, 0x2000, 0x2000) // v1.3 Firmware is 2x4K, but the board accepts 2x8K
+
 	ROM_REGION(0x2000, "iop", 0)
 	ROM_LOAD("altos586-v56-iop.rom", 0x0000, 0x2000, CRC(411ca183) SHA1(f2af03d361dddbf6aae055e69210c994ead281d8))
 ROM_END
