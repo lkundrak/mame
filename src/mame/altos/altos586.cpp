@@ -180,7 +180,7 @@ u16 altos586_mmu_device::cpu_mem_r(offs_t offset, u16 mem_mask)
 	if (m_user && check_mem_violation (offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
 		return 0xffff;
 	} else {
-		return m_mem->read_word_unaligned(phys_mem_addr(offset), mem_mask);
+		return m_mem->read_word(phys_mem_addr(offset), mem_mask);
 	}
 }
 
@@ -202,7 +202,7 @@ void altos586_mmu_device::cpu_mem_w(offs_t offset, u16 data, u16 mem_mask)
 		check_mem_violation (offset, STACK_BOUND, 0, END_OF_STACK);
 	}
 
-	m_mem->write_word_unaligned(phys_mem_addr(offset), data, mem_mask);
+	m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
 }
 
 u16 altos586_mmu_device::cpu_io_r(offs_t offset, u16 mem_mask)
@@ -211,7 +211,7 @@ u16 altos586_mmu_device::cpu_io_r(offs_t offset, u16 mem_mask)
 		m_syscall_handler(ASSERT_LINE);
 		return 0xffff;
 	} else {
-		return m_io->read_word_unaligned(offset << 1, mem_mask);
+		return m_io->read_word(offset << 1, mem_mask);
 	}
 }
 
@@ -222,7 +222,7 @@ void altos586_mmu_device::cpu_io_w(offs_t offset, u16 data, u16 mem_mask)
 		// TODO: I have not tested if I got syscall handling right.
 		m_syscall_handler(ASSERT_LINE);
 	} else {
-		m_io->write_word_unaligned(offset << 1, data, mem_mask);
+		m_io->write_word(offset << 1, data, mem_mask);
 	}
 }
 
@@ -233,7 +233,7 @@ void altos586_mmu_device::bus_mem(address_map &map)
 
 u16 altos586_mmu_device::bus_mem_r(offs_t offset, u16 mem_mask)
 {
-	return m_mem->read_word_unaligned(phys_mem_addr(offset), mem_mask);
+	return m_mem->read_word(phys_mem_addr(offset), mem_mask);
 }
 
 void altos586_mmu_device::bus_mem_w(offs_t offset, u16 data, u16 mem_mask)
@@ -241,7 +241,7 @@ void altos586_mmu_device::bus_mem_w(offs_t offset, u16 data, u16 mem_mask)
 	if (check_mem_violation (offset, IOP_W, 1, IOP_W_VIOLATION)) {
 		return;
 	} else {
-		m_mem->write_word_unaligned(phys_mem_addr(offset), data, mem_mask);
+		m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
 	}
 }
 
@@ -253,12 +253,12 @@ void altos586_mmu_device::bus_io(address_map &map)
 
 u16 altos586_mmu_device::bus_io_r(offs_t offset, u16 mem_mask)
 {
-	return m_io->read_word_unaligned(offset, mem_mask);
+	return m_io->read_word(offset, mem_mask);
 }
 
 void altos586_mmu_device::bus_io_w(offs_t offset, u16 data, u16 mem_mask)
 {
-	m_io->write_word_unaligned(offset, data, mem_mask);
+	m_io->write_word(offset, data, mem_mask);
 }
 
 void altos586_mmu_device::device_start()
