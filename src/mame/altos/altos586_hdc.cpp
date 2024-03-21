@@ -120,14 +120,16 @@ void altos586_hdc_device::altos586_hdc_mem(address_map &map)
 
 uint16_t altos586_hdc_device::data_r(offs_t offset)
 {
-	uint8_t value;
+	uint8_t value = m_sector[m_secoffset];
 
-	value = m_sector[m_secoffset++];
-	m_secoffset %= sizeof(m_sector);
+	if (!machine().side_effects_disabled()) {
+		m_secoffset++;
+		m_secoffset %= std::size(m_sector);
 
-	if (m_secoffset == 0) {
-		LOG("read reached the end of the data buffer\n");
-		m_iop->drq1_w(CLEAR_LINE);
+		if (m_secoffset == 0) {
+			LOG("read reached the end of the data buffer\n");
+			m_iop->drq1_w(CLEAR_LINE);
+		}
 	}
 
 	return value;
@@ -136,7 +138,7 @@ uint16_t altos586_hdc_device::data_r(offs_t offset)
 void altos586_hdc_device::data_w(offs_t offset, uint16_t data)
 {
 	m_sector[m_secoffset++] = data;
-	m_secoffset %= sizeof(m_sector);
+	m_secoffset %= std::size(m_sector);
 
 	if (m_secoffset == 5) {
 		// If we reached this watermark in the data buffer, we've completed
