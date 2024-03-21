@@ -176,7 +176,7 @@ altos586_mmu_device::altos586_mmu_device(const machine_config &mconfig, const ch
 
 u16 altos586_mmu_device::cpu_mem_r(offs_t offset, u16 mem_mask)
 {
-	if (m_user && check_mem_violation(offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
+	if (!machine().side_effects_disabled() && m_user && check_mem_violation(offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
 		return 0xffff;
 	} else {
 		return m_mem->read_word(phys_mem_addr(offset), mem_mask);
@@ -206,7 +206,7 @@ void altos586_mmu_device::cpu_mem_w(offs_t offset, u16 data, u16 mem_mask)
 
 u16 altos586_mmu_device::cpu_io_r(offs_t offset, u16 mem_mask)
 {
-	if (m_user) {
+	if (!machine().side_effects_disabled() && m_user) {
 		m_syscall_handler(ASSERT_LINE);
 		return 0xffff;
 	} else {
