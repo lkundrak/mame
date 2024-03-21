@@ -31,6 +31,8 @@
 
 #include "emu.h"
 
+#include "altos586_hdc.h"
+
 #include "bus/rs232/rs232.h"
 
 #include "cpu/i86/i86.h"
@@ -47,8 +49,6 @@
 #include "machine/z80dma.h"
 #include "machine/z80pio.h"
 #include "machine/z80sio.h"
-
-#include "altos586_hdc.h"
 
 // TODO: Should this be a separate device? It is on a same board.
 // I've split this so that I've got two device_memory_interface-s --
