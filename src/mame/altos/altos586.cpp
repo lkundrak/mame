@@ -589,7 +589,6 @@ void altos586_state::machine_start()
 	space(AS_PROGRAM).install_ram(0, m_ram->size() - 1, m_ram->pointer());
 
 	// The address lines to the ROMs are reversed
-	// TODO: is this the right place for this sort of thing?
 	std::reverse(romdata, romdata + romlen);
 
 	m_mmu->space(AS_PROGRAM).specific(m_mmu_mem);
