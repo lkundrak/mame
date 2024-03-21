@@ -126,8 +126,8 @@ private:
 
 	// Access to board's unmanaged address spaces
 	required_device<device_memory_interface> m_board;
-	address_space *m_mem;
-	address_space *m_io;
+	memory_access<20, 1, 0, ENDIANNESS_LITTLE>::specific m_mem;
+	memory_access<16, 1, 0, ENDIANNESS_LITTLE>::specific m_io;
 
 	// Configuration for managed address spaces we provide
 	address_space_config m_program_config;
@@ -179,7 +179,7 @@ u16 altos586_mmu_device::cpu_mem_r(offs_t offset, u16 mem_mask)
 	if (!machine().side_effects_disabled() && m_user && check_mem_violation(offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
 		return 0xffff;
 	} else {
-		return m_mem->read_word(phys_mem_addr(offset), mem_mask);
+		return m_mem.read_word(phys_mem_addr(offset), mem_mask);
 	}
 }
 
@@ -201,7 +201,7 @@ void altos586_mmu_device::cpu_mem_w(offs_t offset, u16 data, u16 mem_mask)
 		check_mem_violation(offset, STACK_BOUND, 0, END_OF_STACK);
 	}
 
-	m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
+	m_mem.write_word(phys_mem_addr(offset), data, mem_mask);
 }
 
 u16 altos586_mmu_device::cpu_io_r(offs_t offset, u16 mem_mask)
@@ -210,7 +210,7 @@ u16 altos586_mmu_device::cpu_io_r(offs_t offset, u16 mem_mask)
 		m_syscall_handler(ASSERT_LINE);
 		return 0xffff;
 	} else {
-		return m_io->read_word(offset << 1, mem_mask);
+		return m_io.read_word(offset << 1, mem_mask);
 	}
 }
 
@@ -221,7 +221,7 @@ void altos586_mmu_device::cpu_io_w(offs_t offset, u16 data, u16 mem_mask)
 		// TODO: I have not tested if I got syscall handling right.
 		m_syscall_handler(ASSERT_LINE);
 	} else {
-		m_io->write_word(offset << 1, data, mem_mask);
+		m_io.write_word(offset << 1, data, mem_mask);
 	}
 }
 
@@ -232,7 +232,7 @@ void altos586_mmu_device::bus_mem(address_map &map)
 
 u16 altos586_mmu_device::bus_mem_r(offs_t offset, u16 mem_mask)
 {
-	return m_mem->read_word(phys_mem_addr(offset), mem_mask);
+	return m_mem.read_word(phys_mem_addr(offset), mem_mask);
 }
 
 void altos586_mmu_device::bus_mem_w(offs_t offset, u16 data, u16 mem_mask)
@@ -240,7 +240,7 @@ void altos586_mmu_device::bus_mem_w(offs_t offset, u16 data, u16 mem_mask)
 	if (check_mem_violation(offset, IOP_W, 1, IOP_W_VIOLATION)) {
 		return;
 	} else {
-		m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
+		m_mem.write_word(phys_mem_addr(offset), data, mem_mask);
 	}
 }
 
@@ -252,20 +252,22 @@ void altos586_mmu_device::bus_io(address_map &map)
 
 u16 altos586_mmu_device::bus_io_r(offs_t offset, u16 mem_mask)
 {
-	return m_io->read_word(offset, mem_mask);
+	return m_io.read_word(offset, mem_mask);
 }
 
 void altos586_mmu_device::bus_io_w(offs_t offset, u16 data, u16 mem_mask)
 {
-	m_io->write_word(offset, data, mem_mask);
+	m_io.write_word(offset, data, mem_mask);
 }
 
 void altos586_mmu_device::device_start()
 {
 	set_system_mode();
 	m_cpu_if = false;
-	m_mem = &m_board->space(AS_PROGRAM);
-	m_io = &m_board->space(AS_IO);
+
+	m_board->space(AS_PROGRAM).specific(m_mem);
+	m_board->space(AS_IO).specific(m_io);
+
 	m_violation_callback.resolve();
 
 	save_item(NAME(m_user));
