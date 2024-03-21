@@ -31,22 +31,22 @@
 
 #include "emu.h"
 
+#include "bus/rs232/rs232.h"
+
 #include "cpu/i86/i86.h"
 #include "cpu/z80/z80.h"
 
+#include "imagedev/floppy.h"
+
 #include "machine/clock.h"
-#include "machine/ram.h"
+#include "machine/mm58167.h"
 #include "machine/pic8259.h"
 #include "machine/pit8253.h"
+#include "machine/ram.h"
+#include "machine/wd_fdc.h"
 #include "machine/z80dma.h"
 #include "machine/z80pio.h"
 #include "machine/z80sio.h"
-#include "machine/wd_fdc.h"
-#include "machine/mm58167.h"
-
-#include "imagedev/floppy.h"
-
-#include "bus/rs232/rs232.h"
 
 #include "altos586_hdc.h"
 
