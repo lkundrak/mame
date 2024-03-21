@@ -158,7 +158,6 @@ private:
 		USER_ACC		= 14,		// Allow User Access
 		USER_W			= 15,		// Allow User Write
 	};
-	// TODO: These are SRAM chips. Should this be a RAM device?
 	u16 m_map_ram[256];
 };
 
