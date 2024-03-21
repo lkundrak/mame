@@ -176,7 +176,7 @@ altos586_mmu_device::altos586_mmu_device(const machine_config &mconfig, const ch
 
 u16 altos586_mmu_device::cpu_mem_r(offs_t offset, u16 mem_mask)
 {
-	if (m_user && check_mem_violation (offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
+	if (m_user && check_mem_violation(offset, USER_ACC, 1, USER_ACC_VIOLATION)) {
 		return 0xffff;
 	} else {
 		return m_mem->read_word(phys_mem_addr(offset), mem_mask);
@@ -186,19 +186,19 @@ u16 altos586_mmu_device::cpu_mem_r(offs_t offset, u16 mem_mask)
 void altos586_mmu_device::cpu_mem_w(offs_t offset, u16 data, u16 mem_mask)
 {
 	if (m_user) {
-		if (check_mem_violation (offset, USER_W, 1, USER_W_VIOLATION))
+		if (check_mem_violation(offset, USER_W, 1, USER_W_VIOLATION))
 			return;
-		if (check_mem_violation (offset, USER_ACC, 1, USER_ACC_VIOLATION))
+		if (check_mem_violation(offset, USER_ACC, 1, USER_ACC_VIOLATION))
 			return;
 	} else {
-		if (check_mem_violation (offset, SYS_W, 1, SYS_W_VIOLATION))
+		if (check_mem_violation(offset, SYS_W, 1, SYS_W_VIOLATION))
 			return;
 	}
 
 	if ((offset & 0x7ff) < 0x40) {
 		// Check the stack boundary watermark so that XENIX could map
 		// some more memory, but don't abort the write cycle.
-		check_mem_violation (offset, STACK_BOUND, 0, END_OF_STACK);
+		check_mem_violation(offset, STACK_BOUND, 0, END_OF_STACK);
 	}
 
 	m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
@@ -237,7 +237,7 @@ u16 altos586_mmu_device::bus_mem_r(offs_t offset, u16 mem_mask)
 
 void altos586_mmu_device::bus_mem_w(offs_t offset, u16 data, u16 mem_mask)
 {
-	if (check_mem_violation (offset, IOP_W, 1, IOP_W_VIOLATION)) {
+	if (check_mem_violation(offset, IOP_W, 1, IOP_W_VIOLATION)) {
 		return;
 	} else {
 		m_mem->write_word(phys_mem_addr(offset), data, mem_mask);
@@ -323,7 +323,7 @@ bool altos586_mmu_device::check_mem_violation(offs_t offset, int access_bit, int
 			if (BIT(m_control, 2))
 				m_err_addr2 |= 0x0800; // NMI enabled
 		}
-		signal_violation (violation_bits);
+		signal_violation(violation_bits);
 		return true;
 	}
 }
@@ -366,7 +366,7 @@ void altos586_mmu_device::cpu_if_w(int state)
 			m_err_addr1 = 0;
 			m_err_addr2 = 0;
 		}
-		signal_violation (INVALID_INSN);
+		signal_violation(INVALID_INSN);
 	}
 }
 
@@ -747,10 +747,10 @@ void altos586_state::altos586(machine_config &config)
 	FLOPPY_CONNECTOR(config, m_floppy[1], altos586_floppies, "525hd", floppy_image_device::default_mfm_floppy_formats);
 
 	z80dma_device &dma(Z80DMA(config, "iop_dma", 8_MHz_XTAL/2));
-	dma.in_mreq_callback().set([this] (offs_t offset) { return m_iop->space(AS_PROGRAM).read_byte(offset); });
-	dma.out_mreq_callback().set([this] (offs_t offset, u8 data) { m_iop->space(AS_PROGRAM).write_byte(offset, data); });
-	dma.in_iorq_callback().set([this] (offs_t offset) { return m_iop->space(AS_IO).read_byte(offset); });
-	dma.out_iorq_callback().set([this] (offs_t offset, u8 data) { m_iop->space(AS_IO).write_byte(offset, data); });
+	dma.in_mreq_callback().set([this](offs_t offset) { return m_iop->space(AS_PROGRAM).read_byte(offset); });
+	dma.out_mreq_callback().set([this](offs_t offset, u8 data) { m_iop->space(AS_PROGRAM).write_byte(offset, data); });
+	dma.in_iorq_callback().set([this](offs_t offset) { return m_iop->space(AS_IO).read_byte(offset); });
+	dma.out_iorq_callback().set([this](offs_t offset, u8 data) { m_iop->space(AS_IO).write_byte(offset, data); });
 
 	// TODO: The RTC seems to run approx. 2 times slower. Why?
 	MM58167(config, "iop_rtc", 32.768_kHz_XTAL);
