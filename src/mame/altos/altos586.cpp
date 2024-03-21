@@ -372,7 +372,6 @@ void altos586_mmu_device::cpu_if_w(int state)
 	}
 }
 
-// TODO: Why. Should the above be in such a namespace too.
 namespace {
 
 class altos586_state : public driver_device, public device_memory_interface {
