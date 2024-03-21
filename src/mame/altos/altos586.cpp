@@ -582,7 +582,6 @@ void altos586_state::machine_start()
 	int len = memregion("bios")->bytes();
 
 	// The address lines to the ROMs are reversed
-	// TODO: is this the right place for this sort of thing?
 	std::reverse(romdata, romdata + len);
 
 	m_mmu->space(AS_PROGRAM).specific(m_mmu_mem);
