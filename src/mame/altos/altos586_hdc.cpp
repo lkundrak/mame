@@ -84,7 +84,7 @@ bool altos586_hdc_device::sector_exists(uint8_t index)
 	return false;
 }
 
-uint32_t altos586_hdc_device::sector_lba(uint8_t index)
+uint32_t altos586_hdc_device::sector_lba(uint8_t const index)
 {
 	return (m_cyl[m_drive] * m_geom[m_drive]->heads + m_head) * m_geom[m_drive]->sectors + index;
 }
