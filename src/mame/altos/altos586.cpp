@@ -383,6 +383,7 @@ public:
 		, m_io_config("io", ENDIANNESS_LITTLE, 16, 16, 0, address_map_constructor(FUNC(altos586_state::io_map), this))
 		, m_cpu(*this, "cpu")
 		, m_mmu(*this, "mmu")
+		, m_ram(*this, RAM_TAG)
 		, m_pic(*this, "pic8259")
 		, m_pit(*this, "pit")
 		, m_iop(*this, "iop")
@@ -427,6 +428,7 @@ private:
 
 	required_device<i8086_cpu_device> m_cpu;
 	required_device<altos586_mmu_device> m_mmu;
+	required_device<ram_device> m_ram;
 	required_device<pic8259_device> m_pic;
 	required_device<pit8254_device> m_pit;
 	required_device<z80_device> m_iop;
@@ -438,7 +440,6 @@ private:
 
 void altos586_state::mem_map(address_map &map)
 {
-	map(0x00000, 0xfffff).ram().share(RAM_TAG);
 	// ROM needs to be there for IOP bootup
 	map(0xfc000, 0xfffff).rom().region("bios", 0);
 }
@@ -581,11 +582,13 @@ IRQ_CALLBACK_MEMBER(altos586_state::inta_cb)
 void altos586_state::machine_start()
 {
 	u8 *romdata = memregion("bios")->base();
-	int len = memregion("bios")->bytes();
+	int romlen = memregion("bios")->bytes();
+
+	space(AS_PROGRAM).install_ram(0, m_ram->size() - 1, m_ram->pointer());
 
 	// The address lines to the ROMs are reversed
 	// TODO: is this the right place for this sort of thing?
-	std::reverse(romdata, romdata + len);
+	std::reverse(romdata, romdata + romlen);
 
 	save_item(NAME(m_hiaddr));
 }
