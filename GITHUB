@@ -1,0 +1,94 @@
+	SAVE ITEM
+
+		0.  I know this file is a bit inconsistent right now, but can you please use 
+		    “English” style spacing with parentheses consistently in new code here? Format 
+		    it like:
+		ea3aaf17947d4f3048579d5979b99fda5cba8899
+	    
+		1.  Please keep the data members and member functions grouped in each section – 
+		    you’ve got data members above and below the member functions here.
+		2a00af5423f04fd67b94435d4c9aa277cb2cef3a
+	    
+		2.  You should use required_address_space in place of m_bus and m_bus_mem. It lets 
+		    the user configure the address space number and takes care of validating that 
+		    the address space exists.
+		1de195a1ab8a714b63792046c22de0f44bdb918c
+	    
+		3.  Please use the logmacro.h utilities for compile-time configurable logging.
+		036778124ba82f1aae1cc3ff83a9defd3c13f725
+	    
+		4.  Should this be checked when mounting a disk image rather than on every sector 
+		    access?
+		12b2318a7fa75326cdd117ccaf24ef598b53972d
+	    
+		5.  Should this be const-qualified?
+		ab4023f8002
+	    
+		6.  If you use required_device_array for the disks, you can just index it rather 
+		    than using conditional operators.
+		872a420ed9bd3b4c25c4d5d660e5b9f6a8ab8161
+	    
+		7.  Why are you using the unaligned read/write functions here? The offset is 
+		    shifted to the left by 1, so an unaligned access is impossible.
+		1e1b9496ae1bda861fe40f50c697c8d2d57d83c6
+	    
+		8.  You need to check machine().side_effects_disabled() before applying read side 
+		    effects, or chaos ensues when debugger memory windows are open. Also, it’s 
+		    safer to use std::size rather than sizeof if you want the number of elements in 
+		    an array (it will give a compile error if you inadvertently cause the array to 
+		    decay to a pointer, etc.).
+		6a7225bf602
+	    
+		9.  You need to hook the load and unload events on the hard disks to do this, as 
+		    MAME won’t prevent the user from unmounting a hard disk on-the-fly.
+		84eb5162eb6
+	    
+	10. Have the owner install the device in its address space. This is a very fragile 
+	    way of doing things.
+
+	SAVE ITEM
+	    
+		11. Please sort these. It makes it easier to keep track of things.
+		eddc7bb30f1
+	    
+		12. Please #include local project headers before library headers.
+		79296c9753a
+	    
+		13. Don’t use ram_device unnecessarily. It has numerous issues.
+		4d4065af9d6
+	    
+		14. Can you get rid of the extra space on the function calls check_mem_violation 
+		    (...)? The rest of the code has no space between function name and opening 
+		    parenthesis of arguments.
+		ff44b90522c
+	    
+		15. You need to check machine().side_effects_disabled() before read side effects.
+	    
+		16. Since you know what these address spaces will be, you should use 
+		    memory_access::specific<...> to improve performance.
+		41f695f4b55343e50c827d490f3c6ffc70536607
+	    
+		17. As you’re calling this from read handlers and it has side effects, you need to 
+		    check machine().side_effects_disabled() before causing side effects.
+		    Also, another stray space in signal_violation (violation_bits);.
+	    
+		18. You can put device classes in anonymous namespaces, but the device type 
+		    definition needs to be in the global namespace right now.
+		57e2756f852
+	    
+		19. RAM size configuration won’t work if you do this – you need to check the size 
+		    of the RAM on start and install it with correct mirroring.
+		b10a3e51ebe618726978c2ed8f62c849c0d0ee4c
+	    
+		20. You should really use a memory_access::specific<...> for these.
+	    
+		21. It’s fine to do it here. Alternatively, you can use a driver init callback to 
+		    do it if different systems have different address line mappings.
+		860e4511244
+	    
+		22. You don’t need the ROM_SYSTEM_BIOS and ROM_BIOS stuff if there’s only one BIOS 
+		    version. If there are multiple versions, you should use a mnemonic tag and 
+		    description in the ROM_SYSTEM_BIOS macro.
+		b76473344dd2ca15aeb36b490622dee49db82417
+
+	SAVE ITEM
