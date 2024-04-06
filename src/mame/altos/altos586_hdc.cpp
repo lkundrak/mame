@@ -368,10 +368,4 @@ void altos586_hdc_device::attn_w(uint16_t data)
 
 void altos586_hdc_device::device_start()
 {
-	// TODO: Eeek! This is quite possibly not a great way to tap into board's I/O space.
-	// It's done in order to cope with the peculiarities of altos586 MMU implementation.
-	// Please send help.
-	auto m_board = dynamic_cast<device_memory_interface *>(owner());
-
-	m_board->space(AS_IO).install_write_handler(0xff00, 0xff01, write16smo_delegate(*this, FUNC(altos586_hdc_device::attn_w)));
 }

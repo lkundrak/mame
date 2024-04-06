@@ -30,6 +30,9 @@ public:
 	uint16_t mem_r(offs_t offset, uint16_t mem_mask = ~0);
 	void mem_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
 
+	// Register on main bus.
+	void attn_w(uint16_t data);
+
 protected:
 	virtual void device_start() override;
 	virtual void device_reset() override;
@@ -39,9 +42,6 @@ protected:
 	void altos586_hdc_mem(address_map &map);
 
 private:
-	// Register on main bus.
-	void attn_w(uint16_t data);
-
 	// Disk controller registers on IOP's I/O bus.
 	uint16_t data_r(offs_t offset) ;
 	void data_w(offs_t offset, uint16_t data);
