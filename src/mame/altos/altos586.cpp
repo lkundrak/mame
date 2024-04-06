@@ -464,9 +464,13 @@ void altos586_state::io_map(address_map &map)
 		NAME([this](offs_t offset, u16 data) { m_pit->write(~offset, data >> 8); }));
 
 	map(0x0200, 0x03ff).rw(m_mmu, FUNC(altos586_mmu_device::map_ram_r), FUNC(altos586_mmu_device::map_ram_w));
+
 	// Addresses 0400H to FFFFH are, unlike the above, accessible from
 	// other bus masters than the main CPU. Peripherals are expected to
 	// hook there. Documented as "Reserved for system bus I/O"
+
+	// Bus peripherals
+	map(0xff00, 0xff01).w("hdc", FUNC(altos586_hdc_device::attn_w));
 }
 
 void altos586_state::cpu_mem(address_map &map)
