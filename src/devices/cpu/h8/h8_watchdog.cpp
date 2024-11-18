@@ -65,6 +65,7 @@ void h8_watchdog_device::tcnt_update(u64 cur_time)
 		if(next_tcnt >= 0x100) {
 			if(m_tcsr & TCSR_WT) {
 				logerror("%s watchdog triggered\n", machine().time().as_string());
+				if (1) {} else
 				if(m_type == B && !(m_tcsr & TCSR_NMI))
 					m_intc->internal_interrupt(3);
 				else
