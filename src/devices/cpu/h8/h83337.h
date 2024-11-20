@@ -27,6 +27,7 @@
 #include "h8_intc.h"
 #include "h8_adc.h"
 #include "h8_dac.h"
+#include "h8_host.h"
 #include "h8_i2c.h"
 #include "h8_port.h"
 #include "h8_pwm.h"
@@ -81,6 +82,7 @@ protected:
 	required_device<h8_intc_device> m_intc;
 	required_device<h8_adc_device> m_adc;
 	required_device<h8_dac_device> m_dac;
+	required_device_array<h8_host_device, 2> m_host;
 	required_device<h8_i2c_device> m_i2c;
 	required_device<h8_port_device> m_port1;
 	required_device<h8_port_device> m_port2;
