@@ -29,6 +29,7 @@
 #include "h8_dac.h"
 #include "h8_i2c.h"
 #include "h8_port.h"
+#include "h8_pwm.h"
 #include "h8_timer8.h"
 #include "h8_timer16.h"
 #include "h8_sci.h"
@@ -90,6 +91,7 @@ protected:
 	required_device<h8_port_device> m_port7;
 	required_device<h8_port_device> m_port8;
 	required_device<h8_port_device> m_port9;
+	required_device_array<h8_pwm_device, 2> m_pwm;
 	required_device<h8_timer8_channel_device> m_timer8_0;
 	required_device<h8_timer8_channel_device> m_timer8_1;
 	required_device<h8_timer16_device> m_timer16;

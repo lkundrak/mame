@@ -42,6 +42,7 @@ h83337_device::h83337_device(const machine_config &mconfig, device_type type, co
 	m_port7(*this, "port7"),
 	m_port8(*this, "port8"),
 	m_port9(*this, "port9"),
+	m_pwm(*this, "pwm%u", 1),
 	m_timer8_0(*this, "timer8_0"),
 	m_timer8_1(*this, "timer8_1"),
 	m_timer16(*this, "timer16"),
@@ -90,6 +91,14 @@ void h83337_device::map(address_map &map)
 	map(0xff96, 0xff96).rw(m_timer16_0, FUNC(h8_timer16_channel_device::tcr_r), FUNC(h8_timer16_channel_device::tcr_w));
 //  map(0xff97, 0xff97).rw(m_timer16_0, FUNC(h8_timer16_channel_device::tocr_r, FUNC(h8_timer16_channel_device:tocr_w));
 	map(0xff98, 0xff9f).r(m_timer16_0, FUNC(h8_timer16_channel_device::tgr_r));
+
+	map(0xffa0, 0xffa0).rw(m_pwm[0], FUNC(h8_pwm_device::tcr_r), FUNC(h8_pwm_device::tcr_w));
+	map(0xffa1, 0xffa1).rw(m_pwm[0], FUNC(h8_pwm_device::dtr_r), FUNC(h8_pwm_device::dtr_w));
+	map(0xffa2, 0xffa2).rw(m_pwm[0], FUNC(h8_pwm_device::tcnt_r), FUNC(h8_pwm_device::tcnt_w));
+
+	map(0xffa4, 0xffa4).rw(m_pwm[1], FUNC(h8_pwm_device::tcr_r), FUNC(h8_pwm_device::tcr_w));
+	map(0xffa5, 0xffa5).rw(m_pwm[1], FUNC(h8_pwm_device::dtr_r), FUNC(h8_pwm_device::dtr_w));
+	map(0xffa6, 0xffa6).rw(m_pwm[1], FUNC(h8_pwm_device::tcnt_r), FUNC(h8_pwm_device::tcnt_w));
 
 	map(0xffa8, 0xffa9).rw(m_watchdog, FUNC(h8_watchdog_device::wd_r), FUNC(h8_watchdog_device::wd_w));
 
@@ -173,6 +182,8 @@ void h83337_device::device_add_mconfig(machine_config &config)
 	H8_PORT(config, m_port7, *this, h8_device::PORT_7, 0x00, 0x00);
 	H8_PORT(config, m_port8, *this, h8_device::PORT_8, 0x80, 0x80);
 	H8_PORT(config, m_port9, *this, h8_device::PORT_9, 0x00, 0x00);
+	H8_PWM(config, m_pwm[0]);
+	H8_PWM(config, m_pwm[1]);
 	H8_TIMER8_CHANNEL(config, m_timer8_0, *this, m_intc, 19, 20, 21, 8, 2, 64, 32, 1024, 256);
 	H8_TIMER8_CHANNEL(config, m_timer8_1, *this, m_intc, 22, 23, 24, 8, 2, 64, 128, 1024, 2048);
 	H8_TIMER16(config, m_timer16, *this, 1, 0xff);
