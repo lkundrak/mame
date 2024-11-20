@@ -735,6 +735,8 @@ if CPUS["H8"] then
 		MAME_DIR .. "src/devices/cpu/h8/h8s2655.h",
 		MAME_DIR .. "src/devices/cpu/h8/h8_adc.cpp",
 		MAME_DIR .. "src/devices/cpu/h8/h8_adc.h",
+		MAME_DIR .. "src/devices/cpu/h8/h8_dac.cpp",
+		MAME_DIR .. "src/devices/cpu/h8/h8_dac.h",
 		MAME_DIR .. "src/devices/cpu/h8/h8_dma.cpp",
 		MAME_DIR .. "src/devices/cpu/h8/h8_dma.h",
 		MAME_DIR .. "src/devices/cpu/h8/h8_dtc.cpp",

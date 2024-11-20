@@ -31,6 +31,7 @@ h83337_device::h83337_device(const machine_config &mconfig, device_type type, co
 	m_sda_r(*this, 1),
 	m_intc(*this, "intc"),
 	m_adc(*this, "adc"),
+	m_dac(*this, "dac"),
 	m_i2c(*this, "i2c"),
 	m_port1(*this, "port1"),
 	m_port2(*this, "port2"),
@@ -146,12 +147,17 @@ void h83337_device::map(address_map &map)
 	map(0xffe9, 0xffe9).rw(m_adc, FUNC(h8_adc_device::adcr_r), FUNC(h8_adc_device::adcr_w));
 
 	map(0xfff2, 0xfff2).rw(m_port6, FUNC(h8_port_device::pcr_r), FUNC(h8_port_device::pcr_w));
+	map(0xfff8, 0xfff8).rw(m_dac, FUNC(h8_dac_device::dadr0_r), FUNC(h8_dac_device::dadr0_w));
+	map(0xfff9, 0xfff9).rw(m_dac, FUNC(h8_dac_device::dadr1_r), FUNC(h8_dac_device::dadr1_w));
+	map(0xfffa, 0xfffa).rw(m_dac, FUNC(h8_dac_device::dacr_r), FUNC(h8_dac_device::dacr_w));
+
 }
 
 void h83337_device::device_add_mconfig(machine_config &config)
 {
 	H8_INTC(config, m_intc, *this);
 	H8_ADC_3337(config, m_adc, *this, m_intc, 35);
+	H8_DAC(config, m_dac);
 
 	H8_I2C(config, m_i2c);
 	m_i2c->scl_cb().set([this](int state) { m_scl_w(state); });
