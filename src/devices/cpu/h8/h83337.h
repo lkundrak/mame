@@ -70,6 +70,12 @@ public:
 	void syscr_w(u8 data);
 	u8 mdcr_r();
 	void mdcr_w(u8 data);
+	u8 hicr_r();
+	void hicr_w(u8 data);
+	u8 kmimr_r();
+	void kmimr_w(u8 data);
+	u8 kmimra_r();
+	void kmimra_w(u8 data);
 
 protected:
 	h83337_device(const machine_config &mconfig, device_type type, const char *tag, device_t *owner, u32 clock, address_map_constructor map_delegate, u32 start);
@@ -106,6 +112,9 @@ protected:
 	u8 m_wscr;
 	u8 m_stcr;
 	u8 m_syscr;
+	u8 m_hicr;
+	u8 m_kmimr;
+	u8 m_kmimra;
 
 	virtual void update_irq_filter() override;
 	virtual void interrupt_taken() override;

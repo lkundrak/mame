@@ -156,7 +156,10 @@ void h83337_device::map(address_map &map)
 	map(0xffe8, 0xffe8).rw(m_adc, FUNC(h8_adc_device::adcsr_r), FUNC(h8_adc_device::adcsr_w));
 	map(0xffe9, 0xffe9).rw(m_adc, FUNC(h8_adc_device::adcr_r), FUNC(h8_adc_device::adcr_w));
 
+	map(0xfff0, 0xfff0).rw(FUNC(h83337_device::hicr_r), FUNC(h83337_device::hicr_w));
+	map(0xfff1, 0xfff1).rw(FUNC(h83337_device::kmimr_r), FUNC(h83337_device::kmimr_w));
 	map(0xfff2, 0xfff2).rw(m_port6, FUNC(h8_port_device::pcr_r), FUNC(h8_port_device::pcr_w));
+	map(0xfff3, 0xfff3).rw(FUNC(h83337_device::kmimra_r), FUNC(h83337_device::kmimra_w));
 
 	map(0xfff4, 0xfff4).rw(m_host[0], FUNC(h8_host_device::idr_r), FUNC(h8_host_device::idr_w));
 	map(0xfff5, 0xfff5).rw(m_host[0], FUNC(h8_host_device::odr_r), FUNC(h8_host_device::odr_w));
@@ -260,10 +263,16 @@ void h83337_device::device_start()
 	m_wscr = 0;
 	m_stcr = 0;
 	m_syscr = 0;
+	m_hicr = 0;
+	m_kmimr = 0;
+	m_kmimra = 0;
 
 	save_item(NAME(m_wscr));
 	save_item(NAME(m_stcr));
 	save_item(NAME(m_syscr));
+	save_item(NAME(m_hicr));
+	save_item(NAME(m_kmimr));
+	save_item(NAME(m_kmimra));
 }
 
 void h83337_device::device_reset()
@@ -273,6 +282,9 @@ void h83337_device::device_reset()
 	m_wscr = 0x08;
 	m_stcr = 0x00;
 	m_syscr = 0x09;
+	m_hicr = 0xf8;
+	m_kmimr = 0xbf;
+	m_kmimra = 0xff;
 	m_sci0_i2c_view.select(0);
 }
 
@@ -328,4 +340,40 @@ u8 h83337_device::mdcr_r()
 void h83337_device::mdcr_w(u8 data)
 {
 	logerror("mdcr = %02x\n", data);
+}
+
+u8 h83337_device::hicr_r()
+{
+	logerror("hicr_r %02x\n", m_hicr);
+	return m_hicr;
+}
+
+void h83337_device::hicr_w(u8 data)
+{
+	logerror("hicr_w %02x\n", data);
+	m_hicr = data;
+}
+
+u8 h83337_device::kmimr_r()
+{
+	logerror("kmimr_r %02x\n", m_kmimr);
+	return m_kmimr;
+}
+
+void h83337_device::kmimr_w(u8 data)
+{
+	logerror("kmimr_w %02x\n", data);
+	m_kmimr = data;
+}
+
+u8 h83337_device::kmimra_r()
+{
+	logerror("kmimra_r %02x\n", m_kmimra);
+	return m_kmimra;
+}
+
+void h83337_device::kmimra_w(u8 data)
+{
+	logerror("kmimra_w %02x\n", data);
+	m_kmimra = data;
 }
