@@ -4,6 +4,7 @@
 #include "bus/rs232/rs232.h"
 #include "machine/input_merger.h"
 #include "machine/i2cmem.h"
+#include "machine/lm80.h"
 
 #include "speaker.h"
 
@@ -14,20 +15,24 @@ class v120_state : public driver_device
 public:
 	v120_state(const machine_config &mconfig, device_type type, const char *tag)
 		: driver_device(mconfig, type, tag),
+		m_lm80_sda(1),
 		m_flashv(0x11),
 		m_lom(*this, "lom"),
 		m_ttya(*this, "ttya"),
-		m_lom_eeprom(*this, "lom_eeprom")
+		m_lom_eeprom(*this, "lom_eeprom"),
+		m_lm80(*this, "lm80")
 	{ }
 
 	void v120(machine_config &config);
 
 private:
+	int m_lm80_sda;
 	u8 m_flashv;
 
 	required_device<h83437_device> m_lom;
 	required_device<rs232_port_device> m_ttya;
 	required_device<i2cmem_device> m_lom_eeprom;
+	required_device<lm80_device> m_lm80;
 
 	void mcu_map(address_map &map);
 	auto sda_read();
@@ -56,10 +61,10 @@ DEVICE_INPUT_DEFAULTS_END
 auto v120_state::sda_read()
 {
 	u8 lom_eeprom_sda = m_lom_eeprom->read_sda();
-	logerror ("sda_read: eeprom=%d\n", lom_eeprom_sda);
+	logerror ("sda_read: eeprom=%d && lm80=%d\n", lom_eeprom_sda, m_lm80_sda);
 
-	// SDA lines from other devices will be mixed in here
-	return lom_eeprom_sda;
+	// Poor man's input merger -- just AND the things
+	return lom_eeprom_sda & m_lm80_sda;
 }
 
 void v120_state::v120(machine_config &config)
@@ -84,6 +89,12 @@ void v120_state::v120(machine_config &config)
 	I2C_24C64(config, m_lom_eeprom);
 	m_lom->scl_cb().append(m_lom_eeprom, FUNC(i2cmem_device::write_scl));
 	m_lom->sda_cb().append(m_lom_eeprom, FUNC(i2cmem_device::write_sda));
+
+	// Fan, Supply & Temperature management.
+	LM80(config, m_lm80);
+	m_lm80->sda_callback().set([this](int state) { m_lm80_sda = state; });
+	m_lom->scl_cb().append(m_lm80, FUNC(lm80_device::scl_write));
+	m_lom->sda_cb().append(m_lm80, FUNC(lm80_device::sda_write));
 
 	// TODO:
 	// - the actual computer:
